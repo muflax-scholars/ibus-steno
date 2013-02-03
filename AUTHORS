@@ -1,1 +1,11 @@
-Peng Huang <shawn.p.huang@gmail.com>
+This mess was written by:
+- muflax <mail@muflax.com>
+
+It's based on Plover (http://ploversteno.org/), written and designed by:
+- Mirabai Knight
+- Joshua Harlan Lifton
+- Hesky Fisher
+
+The project layout is based on ibus-tmpl and ibus-tutcode, respectively by:
+- Peng Huang <shawn.p.huang@gmail.com>
+- KIHARA Hideto <deton@m1.interq.or.jp>
