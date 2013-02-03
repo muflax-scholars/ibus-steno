@@ -1,8 +1,8 @@
 # vim:set et sts=4 sw=4:
 #
-# ibus-tmpl - The Input Bus template project
+# ibus-steno - Steno engine for IBus
 #
-# Copyright (c) 2007-2012 Peng Huang <shawn.p.huang@gmail.com>
+# Copyright (c) 2013 muflax <mail@muflax.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,26 +27,26 @@ import sys
 import getopt
 import locale
 
-from engine import EngineEnchant
+from engine import EngineSteno
 
 class IMApp:
     def __init__(self, exec_by_ibus):
-        engine_name = "enchant python" if exec_by_ibus else "enchant python (debug)"
+        engine_name = "steno" if exec_by_ibus else "steno (debug)"
         self.__component = \
-                IBus.Component.new("org.freedesktop.IBus.EnchantPython",
-                                   "Enchant Python Component",
+                IBus.Component.new("org.freedesktop.IBus.Steno",
+                                   "Steno Component",
                                    "0.1.0",
                                    "GPL",
-                                   "Peng Huang <shawn.p.huang@gmail.com>",
-                                   "http://example.com",
+                                   "muflax <mail@muflax.com>",
+                                   "http://github.com/muflax/ibus-steno",
                                    "/usr/bin/exec",
-                                   "ibus-enchant")
-        engine = IBus.EngineDesc.new("enchant-python",
+                                   "ibus-steno")
+        engine = IBus.EngineDesc.new("steno",
                                      engine_name,
-                                     "English Enchant",
+                                     "Steno",
                                      "en",
                                      "GPL",
-                                     "Peng Huang <shawn.p.huang@gmail.com>",
+                                     "muflax <mail@muflax.com>",
                                      "",
                                      "us")
         self.__component.add_engine(engine)
@@ -54,14 +54,14 @@ class IMApp:
         self.__bus = IBus.Bus()
         self.__bus.connect("disconnected", self.__bus_disconnected_cb)
         self.__factory = IBus.Factory.new(self.__bus.get_connection())
-        self.__factory.add_engine("enchant-python",
-                GObject.type_from_name("EngineEnchant"))
+        self.__factory.add_engine("steno",
+                GObject.type_from_name("EngineSteno"))
         if exec_by_ibus:
-            self.__bus.request_name("org.freedesktop.IBus.EnchantPython", 0)
+            self.__bus.request_name("org.freedesktop.IBus.Steno", 0)
         else:
             self.__bus.register_component(self.__component)
             self.__bus.set_global_engine_async(
-                    "enchant-python", -1, None, None, None)
+                    "steno", -1, None, None, None)
 
     def run(self):
         self.__mainloop.run()

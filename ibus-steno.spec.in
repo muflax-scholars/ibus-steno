@@ -1,0 +1,40 @@
+Name:       @PACKAGE_NAME@
+Version:    @PACKAGE_VERSION@
+Release:    1%{?dist}
+Summary:    Steno input method for IBus
+License:    GPL
+Group:      System Environment/Libraries
+URL:        http://github.com/muflax/ibus-steno
+Source0:    http://github.com/muflax/ibus-steno
+
+BuildArch:	noarch
+BuildRequires:  python
+
+Requires:   ibus
+
+%description
+Steno Input Method Engine for IBus.
+
+%prep
+%setup -q
+
+%build
+%configure
+make %{?_smp_mflags}
+
+%install
+rm -rf $RPM_BUILD_ROOT
+make DESTDIR=${RPM_BUILD_ROOT} install
+
+%find_lang %{name}
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files -f %{name}.lang
+%defattr(-,root,root,-)
+%doc README
+%dir %{_datadir}/ibus-steno
+%{_datadir}/ibus-steno
+%{_libexecdir}/ibus-steno
+%{_datadir}/ibus/component/steno.xml

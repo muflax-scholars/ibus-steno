@@ -19,12 +19,12 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301, USA.
 
-icons_DATA = \
-	ibus-steno.png \
+dict_DATA = \
+	default.json \
 	$(NULL)
 
-iconsdir = $(pkgdatadir)/icons
+dictdir = $(pkgdatadir)/dict
 
 EXTRA_DIST = \
-	ibus-steno.png \
+	default.json \
 	$(NULL)

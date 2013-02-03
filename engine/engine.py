@@ -1,8 +1,8 @@
 # vim:set et sts=4 sw=4:
 #
-# ibus-tmpl - The Input Bus template project
+# ibus-steno - Steno engine for IBus
 #
-# Copyright (c) 2007-2012 Peng Huang <shawn.p.huang@gmail.com>
+# Copyright (c) 2013 muflax <mail@muflax.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,18 +26,18 @@ from gi.repository import Pango
 
 keysyms = IBus
 
-class EngineEnchant(IBus.Engine):
-    __gtype_name__ = 'EngineEnchant'
+class EngineSteno(IBus.Engine):
+    __gtype_name__ = 'EngineSteno'
     __dict = enchant.Dict("en")
 
     def __init__(self):
-        super(EngineEnchant, self).__init__()
+        super(EngineSteno, self).__init__()
         self.__is_invalidate = False
         self.__preedit_string = u""
         self.__lookup_table = IBus.LookupTable.new(10, 0, True, True)
         self.__prop_list = IBus.PropList()
         self.__prop_list.append(IBus.Property(key="test", icon="ibus-local"))
-        print "Create EngineEnchant OK"
+        print "Create EngineSteno OK"
 
     def do_process_key_event(self, keyval, keycode, state):
         print "process_key_event(%04x, %04x, %04x)" % (keyval, keycode, state)

@@ -1,8 +1,8 @@
 # vim:set noet ts=4:
 #
-# ibus-tmpl - The Input Bus template project
+# ibus-steno - Steno engine for IBus
 #
-# Copyright (c) 2007-2011 Peng Huang <shawn.p.huang@gmail.com>
+# Copyright (c) 2013 muflax <mail@muflax.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,11 +19,9 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 SUBDIRS = \
-	src \
 	engine \
 	icons \
-	m4 \
-	po \
+	dict \
 	$(NULL)
 
 ACLOCAL_AMFLAGS = -I m4
@@ -36,9 +34,7 @@ EXTRA_DIST = \
 noinst_DIST = \
 	$(NULL)
 
-
 DISTCLEANFILES = \
-	po/stamp-it \
 	$(NULL)
 
 rpm: dist @PACKAGE_NAME@.spec

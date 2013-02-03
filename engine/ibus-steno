@@ -1,8 +1,7 @@
-# vim:set noet ts=4:
+#!/bin/sh
+# ibus-steno - Steno engine for IBus
 #
-# ibus-tmpl - The Input Bus template project
-#
-# Copyright (c) 2007-2011 Peng Huang <shawn.p.huang@gmail.com>
+# Copyright (c) 2013 muflax <mail@muflax.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,8 +15,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+# 02110-1301, USA.
 
-EXTRA_DIST = \
-    as-version.m4 \
-    $(NULL)
+export IBUS_PREFIX=/usr/local
+export IBUS_STENO_PKGDATADIR=/usr/local/share/ibus-steno
+export LIBEXECDIR=${exec_prefix}/libexec
+exec python $IBUS_STENO_PKGDATADIR/engine/main.py $@
+

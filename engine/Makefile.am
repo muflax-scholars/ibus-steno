@@ -1,8 +1,6 @@
-# vim:set noet ts=4:
+# ibus-steno - Steno engine for IBus
 #
-# ibus-tmpl - The Input Bus template project
-#
-# Copyright (c) 2007-2012 Peng Huang <shawn.p.huang@gmail.com>
+# Copyright (c) 2013 muflax <mail@muflax.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,17 +14,18 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+# 02110-1301, USA.
 
-engine_enchant_PYTHON = \
+engine_steno_PYTHON = \
 	engine.py \
 	main.py \
 	$(NULL)
-engine_enchantdir = $(datadir)/ibus-tmpl
+engine_stenodir = $(pkgdatadir)/engine
 
-bin_SCRIPTS = ibus-engine-enchant
+libexec_SCRIPTS = ibus-steno
 
-component_DATA = enchant-python.xml
+component_DATA = steno.xml
 componentdir = $(datadir)/ibus/component
 
 CLEANFILES = \
@@ -34,11 +33,11 @@ CLEANFILES = \
 	$(NULL)
 
 EXTRA_DIST = \
-	ibus-engine-enchant.in \
-	enchant-python.xml.in.in \
+	ibus-steno.in \
+	steno.xml.in.in \
 	$(NULL)
 
-enchant-python.xml: enchant-python.xml.in
+steno.xml: steno.xml.in
 	$(AM_V_GEN) \
 	( \
 		libexecdir=${libexecdir}; \
@@ -46,10 +45,3 @@ enchant-python.xml: enchant-python.xml.in
 		s=`cat $<`; \
 		eval "echo \"$${s}\""; \
 	) > $@
-
-test:
-	$(ENV) \
-		LANG=en_US \
-		PYTHONPATH=$(top_srcdir) \
-		$(PYTHON) $(srcdir)/main.py
-

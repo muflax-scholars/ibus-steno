@@ -1,8 +1,6 @@
-# vim:set et ts=4:
+# ibus-steno - Steno engine for IBus
 #
-# ibus-tmpl - The Input Bus template project
-#
-# Copyright (c) 2007-2011 Peng Huang <shawn.p.huang@gmail.com>
+# Copyright (c) 2013 muflax <mail@muflax.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,48 +17,19 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 # if not 1, append datestamp to the version number.
-m4_define([package_name], [ibus-tmpl])
-m4_define([ibus_released], [0])
+m4_define([package_name], [ibus-steno])
+m4_define([ibus_released], [1])
 m4_define([ibus_major_version], [1])
-m4_define([ibus_minor_version], [2])
-m4_define([ibus_micro_version], [99])
+m4_define([ibus_minor_version], [0])
+m4_define([ibus_micro_version], [2])
 m4_define(ibus_maybe_datestamp,
     m4_esyscmd([if test x]ibus_released[ != x1; then date +.%Y%m%d | tr -d '\n\r'; fi]))
 
 m4_define([ibus_version],
     ibus_major_version.ibus_minor_version.ibus_micro_version[]ibus_maybe_datestamp)
 
-AC_INIT([package_name], [ibus_version], [http://code.google.com/p/ibus/issues/entry], [package_name])
+AC_INIT([package_name], [ibus_version], [http://github.com/deton/ibus-tutcode/issues], [package_name])
 AM_INIT_AUTOMAKE([1.10])
-AC_GNU_SOURCE
-
-AC_CONFIG_HEADERS([config.h])
-AC_CONFIG_MACRO_DIR([m4])
-m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
-
-# define PACKAGE_VERSION_* variables
-AS_VERSION
-AS_NANO
-AM_SANITY_CHECK
-AM_MAINTAINER_MODE
-AM_DISABLE_STATIC
-AC_PROG_CC
-AM_PROG_CC_C_O
-AC_PROG_CXX
-AC_ISC_POSIX
-AC_HEADER_STDC
-AM_PROG_LIBTOOL
-
-# check ibus
-PKG_CHECK_MODULES(IBUS, [
-    ibus-1.0 >= 1.3.0
-])
-
-# check enchant
-PKG_CHECK_MODULES(ENCHANT, [
-    enchant
-])
-
 
 #check python
 AM_PATH_PYTHON([2.5])
@@ -73,18 +42,14 @@ AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [Define to the read-only 
 AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION(0.16.1)
 
-
 # OUTPUT files
-AC_CONFIG_FILES(po/Makefile.in
-Makefile
-ibus-tmpl.spec
-src/Makefile
-src/enchant.xml.in
+AC_CONFIG_FILES(Makefile
+ibus-steno.spec
 engine/Makefile
-engine/ibus-engine-enchant
-engine/enchant-python.xml.in
+engine/ibus-steno
+engine/steno.xml.in
 icons/Makefile
-m4/Makefile
+dict/Makefile
 )
 
 AC_OUTPUT
