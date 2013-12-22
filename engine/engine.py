@@ -134,15 +134,11 @@ class EngineSteno(ibus.EngineBase):
   def process_key_event(self, keyval, keycode, state):
     "handle raw key events"
 
-    if self.__debug:
-      print "process_key_event(%04x, %04x, %04x)" % (keyval, keycode, state)
-
     # ignore key release events
-    is_press = ((state & ibus.ModifierType.RELEASE_MASK) == 0)
-    if not is_press:
-      return False
+    is_release = bool(state & modifier.RELEASE_MASK)
 
-    if self.__preedit_string:
+    # control the preedit window
+    if self.__preedit_string and not is_release:
       if keyval == keysyms.Return:
         self.__commit_string(self.__preedit_string)
         return True
@@ -151,8 +147,8 @@ class EngineSteno(ibus.EngineBase):
         self.__update()
         return True
       elif keyval == keysyms.BackSpace:
-        self.__preedit_string = self.__preedit_string[:-1]
-        self.__invalidate()
+        self.__preedit_string = u""
+        self.__update()
         return True
       elif keyval == keysyms.space:
         if self.__lookup_table.get_number_of_candidates() > 0:
@@ -160,15 +156,6 @@ class EngineSteno(ibus.EngineBase):
         else:
           self.__commit_string(self.__preedit_string)
         return False
-      elif keyval >= 49 and keyval <= 57:
-        #keyval >= keysyms._1 and keyval <= keysyms._9
-        index = keyval - keysyms._1
-        candidates = self.__lookup_table.get_canidates_in_current_page()
-        if index >= len(candidates):
-          return False
-        candidate = candidates[index].text
-        self.__commit_string(candidate)
-        return True
       elif keyval == keysyms.Page_Up or keyval == keysyms.KP_Page_Up:
         self.page_up()
         return True
@@ -183,17 +170,40 @@ class EngineSteno(ibus.EngineBase):
         return True
       elif keyval == keysyms.Left or keyval == keysyms.Right:
         return True
-    if keyval in xrange(keysyms.a, keysyms.z + 1) or \
-      keyval in xrange(keysyms.A, keysyms.Z + 1):
-      if state & (ibus.ModifierType.CONTROL_MASK | ibus.ModifierType.MOD1_MASK) == 0:
-        self.__preedit_string += unichr(keyval)
-        self.__invalidate()
-        return True
-    else:
-      if keyval < 128 and self.__preedit_string:
-        self.__commit_string(self.__preedit_string)
 
-    return False
+    return self.__handle_input(keyval, keycode, state)
+
+  def __handle_input(self, keyval, keycode, state):
+    """analyzes the input, commits any text changes and then returns True/False depending on whether it's done with the event"""
+
+    handled = True
+
+    if self.__debug:
+      print "key: %d %d %d" % (keyval, keycode, state)
+
+    is_release  = bool(state & modifier.RELEASE_MASK)
+    is_modifier = bool(state & (~ modifier.RELEASE_MASK) & modifier.MODIFIER_MASK)
+
+    # ignore key release events
+    if is_modifier:
+      return False
+
+    if self.__debug:
+      print "release: ",  is_release
+
+    # if keyval in xrange(keysyms.a, keysyms.z + 1) or \
+    #   keyval in xrange(keysyms.A, keysyms.Z + 1):
+    #   if state & (ModifierType.CONTROL_MASK | ModifierType.MOD1_MASK) == 0:
+    #     self.__preedit_string += unichr(keyval)
+    #     self.__invalidate()
+    #     return True
+    # else:
+    #   if keyval < 128 and self.__preedit_string:
+    #     self.__commit_string(self.__preedit_string)
+
+    # self.commit_text(ibus.Text("cow"))
+
+    return handled
 
   def __invalidate(self):
     if self.__is_invalidate:
