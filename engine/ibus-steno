@@ -18,8 +18,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301, USA.
 
-export IBUS_PREFIX=/usr/local
-export IBUS_STENO_PKGDATADIR=/usr/local/share/ibus-steno
+export IBUS_PREFIX=/usr
+export IBUS_STENO_PKGDATADIR=/usr/share/ibus-steno
 export LIBEXECDIR=${exec_prefix}/libexec
 exec python $IBUS_STENO_PKGDATADIR/engine/main.py $@
 

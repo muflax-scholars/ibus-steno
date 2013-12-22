@@ -2,7 +2,7 @@ ibus-steno -- a Steno input engine for IBus
 
 Based on [Plover](http://ploversteno.org/).
 
-* Installation
+# Installation
 
 - `git clone git@github.com:muflax/ibus-steno.git`
 - `cd ibus-steno`
@@ -11,3 +11,9 @@ Based on [Plover](http://ploversteno.org/).
 - `make`
 - `make install`
 - Enable ibus-steno in IBus through `ibus-setup`. The engine is under "English" and called "steno".
+
+# Debug
+
+start the engine:
+- `./engine/main.py --verbose`
+- turn on IBus and switch to the engine

@@ -1,4 +1,4 @@
-# vim:set et sts=4 sw=4:
+#!/usr/bin/env python2
 #
 # ibus-steno - Steno engine for IBus
 #
@@ -18,101 +18,102 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-from gi.repository import IBus
-from gi.repository import GLib
-from gi.repository import GObject
 
 import os
 import sys
 import getopt
 import locale
-
-from engine import EngineSteno
+import ibus
+import gobject
+import factory
 
 class IMApp:
-    def __init__(self, exec_by_ibus):
-        engine_name = "steno" if exec_by_ibus else "steno (debug)"
-        self.__component = \
-                IBus.Component.new("org.freedesktop.IBus.Steno",
-                                   "Steno Component",
-                                   "0.1.0",
-                                   "GPL",
-                                   "muflax <mail@muflax.com>",
-                                   "http://github.com/muflax/ibus-steno",
-                                   "/usr/bin/exec",
-                                   "ibus-steno")
-        engine = IBus.EngineDesc.new("steno",
-                                     engine_name,
-                                     "Steno",
-                                     "en",
-                                     "GPL",
-                                     "muflax <mail@muflax.com>",
-                                     "",
-                                     "us")
-        self.__component.add_engine(engine)
-        self.__mainloop = GLib.MainLoop()
-        self.__bus = IBus.Bus()
-        self.__bus.connect("disconnected", self.__bus_disconnected_cb)
-        self.__factory = IBus.Factory.new(self.__bus.get_connection())
-        self.__factory.add_engine("steno",
-                GObject.type_from_name("EngineSteno"))
-        if exec_by_ibus:
-            self.__bus.request_name("org.freedesktop.IBus.Steno", 0)
-        else:
-            self.__bus.register_component(self.__component)
-            self.__bus.set_global_engine_async(
-                    "steno", -1, None, None, None)
+  def __init__(self, exec_by_ibus, debug=False):
+    self.__component = ibus.Component("org.freedesktop.IBus.Steno",
+                                      "Steno Component",
+                                      "0.1.0",
+                                      "GPL",
+                                      "muflax <mail@muflax.com>",
+                                      "http://github.com/muflax/ibus-steno")
+    self.__component.add_engine("steno",
+                                "steno",
+                                "Steno",
+                                "en",
+                                "GPL",
+                                "muflax <mail@muflax.com>",
+                                "",
+                                "us")
 
-    def run(self):
-        self.__mainloop.run()
+    self.__debug = debug
+    self.__mainloop = gobject.MainLoop()
+    self.__bus = ibus.Bus()
+    self.__bus.connect("disconnected", self.__bus_disconnected_cb)
+    self.__factory = factory.EngineFactory(self.__bus, self.__debug)
+    if exec_by_ibus:
+      if self.__debug:
+        print "hooking up with IBus..."
+      self.__bus.request_name("org.freedesktop.IBus.Steno", 0)
+    else:
+      if self.__debug:
+        print "registering bus..."
+      self.__bus.register_component(self.__component)
 
-    def __bus_disconnected_cb(self, bus):
-        self.__mainloop.quit()
+  def run(self):
+    if self.__debug:
+      print "starting main loop..."
 
+    self.__mainloop.run()
 
-def launch_engine(exec_by_ibus):
-    IBus.init()
-    IMApp(exec_by_ibus).run()
+  def __bus_disconnected_cb(self, bus):
+    self.__mainloop.quit()
+
+def launch_engine(exec_by_ibus, debug=False):
+  IMApp(exec_by_ibus, debug).run()
 
 def print_help(out, v = 0):
-    print >> out, "-i, --ibus             executed by IBus."
-    print >> out, "-h, --help             show this message."
-    print >> out, "-d, --daemonize        daemonize ibus"
-    sys.exit(v)
+  print >> out, "-i, --ibus         executed by IBus."
+  print >> out, "-h, --help         show this message."
+  print >> out, "-d, --daemonize    daemonize ibus"
+  print >> out, "-v, --verbose      verbose output"
+  sys.exit(v)
 
 def main():
-    try:
-        locale.setlocale(locale.LC_ALL, "")
-    except:
-        pass
+  try:
+    locale.setlocale(locale.LC_ALL, "")
+  except:
+    pass
 
-    exec_by_ibus = False
-    daemonize = False
+  exec_by_ibus = False
+  daemonize    = False
+  debug        = False
 
-    shortopt = "ihd"
-    longopt = ["ibus", "help", "daemonize"]
+  shortopt = "ihdv"
+  longopt  = ["ibus", "help", "daemonize", "verbose"]
 
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], shortopt, longopt)
-    except getopt.GetoptError, err:
-        print_help(sys.stderr, 1)
+  try:
+    opts, args = getopt.getopt(sys.argv[1:], shortopt, longopt)
+  except getopt.GetoptError, err:
+    print_help(sys.stderr, 1)
 
-    for o, a in opts:
-        if o in ("-h", "--help"):
-            print_help(sys.stdout)
-        elif o in ("-d", "--daemonize"):
-            daemonize = True
-        elif o in ("-i", "--ibus"):
-            exec_by_ibus = True
-        else:
-            print >> sys.stderr, "Unknown argument: %s" % o
-            print_help(sys.stderr, 1)
+  for o, a in opts:
+    if o in ("-h", "--help"):
+      print_help(sys.stdout)
+    elif o in ("-d", "--daemonize"):
+      daemonize = True
+    elif o in ("-i", "--ibus"):
+      exec_by_ibus = True
+    elif o in ("-v", "--verbose"):
+      debug = True
+    else:
+      print >> sys.stderr, "Unknown argument: %s" % o
+      print_help(sys.stderr, 1)
 
-    if daemonize:
-        if os.fork():
-            sys.exit()
+  if daemonize:
+    if os.fork():
+      sys.exit()
 
-    launch_engine(exec_by_ibus)
+  launch_engine(exec_by_ibus, debug)
 
 if __name__ == "__main__":
-    main()
+  main()
+0

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+#
 # ibus-steno - Steno engine for IBus
 #
 # Copyright (c) 2013 muflax <mail@muflax.com>
@@ -17,32 +19,32 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301, USA.
 
-engine_steno_PYTHON = \
-	engine.py \
-	main.py \
-	factory.py \
-	$(NULL)
-engine_stenodir = $(pkgdatadir)/engine
+import ibus
+import engine
+import sys, os, os.path
 
-libexec_SCRIPTS = ibus-steno
+class EngineFactory(ibus.EngineFactoryBase):
+  def __init__(self, bus, debug=False):
+    self.__bus   = bus
+    self.__debug = debug
 
-component_DATA = steno.xml
-componentdir = $(datadir)/ibus/component
+    if self.__debug:
+      print "initializing factory..."
 
-CLEANFILES = \
-	*.pyc \
-	$(NULL)
+    super(EngineFactory, self).__init__(self.__bus)
 
-EXTRA_DIST = \
-	ibus-steno.in \
-	steno.xml.in.in \
-	$(NULL)
+    self.__id = 0
 
-steno.xml: steno.xml.in
-	$(AM_V_GEN) \
-	( \
-		libexecdir=${libexecdir}; \
-		pkgdatadir=${pkgdatadir}; \
-		s=`cat $<`; \
-		eval "echo \"$${s}\""; \
-	) > $@
+    if self.__debug:
+      print "...factory done!"
+
+  def create_engine(self, engine_name):
+    if engine_name == "steno":
+      self.__id += 1
+      return engine.EngineSteno(
+        self.__bus,
+        "%s/%d" % ("/org/freedesktop/IBus/Steno/Engine",
+                   self.__id),
+        self.__debug)
+
+    return super(EngineFactory, self).create_engine(engine_name)
