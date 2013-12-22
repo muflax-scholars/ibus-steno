@@ -59,6 +59,10 @@ class EngineSteno(ibus.EngineBase):
       self.__dict      = self.load_dict()
       self.__prop_list = self.load_props()
 
+      # set up stroke handling
+      self.__down_keys = set()
+      self.__up_keys   = set()
+
       print "ibus-steno ready to roll"
     except Exception as e:
       print traceback.format_exc()
@@ -74,6 +78,55 @@ class EngineSteno(ibus.EngineBase):
     # defaults
     config = {
       "dictionary": "default.json",
+      "keycode_to_steno": {
+        # qwerty keys for reference
+        2: "S-",     # 1
+        3: "T-",     # 2
+        4: "P-",     # 3
+        5: "H-",     # 4
+        6: "*",      # 5
+        7: "#",      # 6
+        8: "-F",     # 7
+        9: "-P",     # 8
+        10: "-L",    # 9
+        11: "-T",    # 0
+        12: "-D",    # -
+        13: "-T -D", # =
+
+        16: "S-",    # q
+        17: "K-",    # w
+        18: "W-",    # e
+        19: "R-",    # r
+        20: "*",     # t
+        21: "*",     # y
+        22: "-R",    # u
+        23: "-B",    # i
+        24: "-G",    # o
+        25: "-S",    # p
+        26: "-Z",    # [
+        27: "-S -Z", # ]
+
+        30: "#",     # a
+        31: "T- K-", # s
+        32: "P- W-", # d
+        33: "H- R-", # f
+        34: "#",     # g
+        35: "#",     # h
+        36: "-F -R", # j
+        37: "-P -B", # k
+        38: "-L -G", # l
+        39: "-T -S", # ;
+        40: "-D -Z", # '
+
+        45: "A- O-", # x
+        46: "A-",    # c
+        47: "O-",    # v
+
+        49: "-E",    # n
+        50: "-U",    # m
+        51: "-E -U", # ,
+        # 52: "-E -U", # .
+      },
     }
 
     # create the configuration directory if needed
@@ -176,11 +229,6 @@ class EngineSteno(ibus.EngineBase):
   def __handle_input(self, keyval, keycode, state):
     """analyzes the input, commits any text changes and then returns True/False depending on whether it's done with the event"""
 
-    handled = True
-
-    if self.__debug:
-      print "key: %d %d %d" % (keyval, keycode, state)
-
     is_release  = bool(state & modifier.RELEASE_MASK)
     is_modifier = bool(state & (~ modifier.RELEASE_MASK) & modifier.MODIFIER_MASK)
 
@@ -188,22 +236,37 @@ class EngineSteno(ibus.EngineBase):
     if is_modifier:
       return False
 
-    if self.__debug:
-      print "release: ",  is_release
+    if not keycode in self.__steno_keycodes():
+      return False
 
-    # if keyval in xrange(keysyms.a, keysyms.z + 1) or \
-    #   keyval in xrange(keysyms.A, keysyms.Z + 1):
-    #   if state & (ModifierType.CONTROL_MASK | ModifierType.MOD1_MASK) == 0:
-    #     self.__preedit_string += unichr(keyval)
-    #     self.__invalidate()
-    #     return True
-    # else:
-    #   if keyval < 128 and self.__preedit_string:
-    #     self.__commit_string(self.__preedit_string)
+    if is_release:
+      self.__up_keys.add(keycode)
+      # remove invalid released keys
+      # self.__up_keys = self.__up_keys.intersection(self._down_keys)
+    else:
+      self.__down_keys.add(keycode)
 
-    # self.commit_text(ibus.Text("cow"))
+    # handle the stroke once all keys are released
+    if self.__down_keys == self.__up_keys:
+      # map pressed keys into steno keys and split multi-key keys into individual keys.
+      steno_keys = []
+      for k in self.__down_keys:
+        if k in self.__config["keycode_to_steno"]:
+          steno_keys.extend(self.__config["keycode_to_steno"][k].split(" "))
+      self.__reset_key_state()
 
-    return handled
+      # parse the stroke
+      if self.__debug:
+        print "steno: ", steno_keys
+      #     self.__preedit_string += unichr(keyval)
+      #     self.__invalidate()
+      #     self.__commit_string(self.__preedit_string)
+
+    return True
+
+  def __steno_keycodes(self):
+    # TODO cache this?
+    return set(self.__config["keycode_to_steno"].keys())
 
   def __invalidate(self):
     if self.__is_invalidate:
@@ -280,6 +343,11 @@ class EngineSteno(ibus.EngineBase):
   def reset(self):
     if self.__debug:
       print "reset"
+    self.__reset_key_state()
+
+  def __reset_key_state(self):
+    self.__down_keys.clear()
+    self.__up_keys.clear()
 
   def property_activate(self, prop_name):
     if self.__debug:
