@@ -3,3 +3,4 @@
 - use ibus config for engine-wide settings
 - documentation
 - write the debugging info to a log or something
+- make auto-repeat work, probs by disabling it in the candidate window and not otherwise
