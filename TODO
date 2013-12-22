@@ -1,4 +1,5 @@
 - load default dictionary from assets
-- UI setup
+- UI config setup
 - use ibus config for engine-wide settings
 - documentation
+- write the debugging info to a log or something

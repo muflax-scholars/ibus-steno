@@ -55,8 +55,8 @@ class EngineSteno(ibus.EngineBase):
       self.__config_file = os.path.join(self.__config_dir, "config.json")
 
       # load various components
-      self.__config  = self.load_config()
-      self.__dict    = self.load_dict()
+      self.__config    = self.load_config()
+      self.__dict      = self.load_dict()
       self.__prop_list = self.load_props()
 
       print "ibus-steno ready to roll"
@@ -65,6 +65,11 @@ class EngineSteno(ibus.EngineBase):
 
   def load_config(self):
     "load / initialize user config"
+
+    # TODO: ibus provides a config interface in self.config; use it
+
+    if self.__debug:
+      print "loadinging config at '%s'..." % self.__config_file
 
     # defaults
     config = {
@@ -92,55 +97,46 @@ class EngineSteno(ibus.EngineBase):
 
   def load_dict(self):
     "initialize steno dictionary"
+
+    if self.__debug:
+      print "loading dictionary..."
+
     dict = {}
     user_dict = os.path.join(self.__config_dir, self.__config["dictionary"])
     if os.path.exists(user_dict):
+      if self.__debug:
+        print "loading dict at '%s'..." % user_dict
       with open(user_dict) as f:
         dict.update(json.load(f))
+
+    if self.__debug:
+      print "dictionary with %d entries loaded." % len(dict)
 
     return dict
 
   def load_props(self):
+    if self.__debug:
+      print "loading properties..."
+
     props = ibus.PropList()
-
-    # input_mode_prop = ibus.Property(key=u"InputMode",
-    #                 type=ibus.PROP_TYPE_MENU,
-    #                 label=u"あ",
-    #                 tooltip=_(u"Switch input mode"))
-    # self.__prop_dict[u"InputMode"] = input_mode_prop
-
-    # props = ibus.PropList()
-    # props.append(ibus.Property(key=u"InputMode.Latin",
-    #              type=ibus.PROP_TYPE_RADIO,
-    #              label=_(u"Latin")))
-    # props.append(ibus.Property(key=u"InputMode.Hiragana",
-    #              type=ibus.PROP_TYPE_RADIO,
-    #              label=_(u"Hiragana")))
-    # props.append(ibus.Property(key=u"InputMode.Katakana",
-    #              type=ibus.PROP_TYPE_RADIO,
-    #              label=_(u"Katakana")))
 
     for prop in props:
       self.__prop_dict[prop.key] = prop
-
-    # prop_name = self.__input_mode_prop_names[self.__tutcode.input_mode]
-    # self.__prop_dict[prop_name].set_state(ibus.PROP_STATE_CHECKED)
-
-    # input_mode_prop.set_sub_props(props)
-    # tutcode_props.append(input_mode_prop)
 
     return props
 
   # def __get_clipboard(self, clipboard, text, data):
   #   clipboard_text = clipboard.wait_for_text()
   #   if clipboard_text:
-  #     handled, output = \
-  #               self.__tutcode.append_text(clipboard_text.decode('UTF-8'))
+  #     handled, output = self.__tutcode.append_text(clipboard_text.decode('UTF-8'))
   #     self.__check_handled(handled, output)
 
-  def do_process_key_event(self, keyval, keycode, state):
+  def process_key_event(self, keyval, keycode, state):
     "handle raw key events"
-    print "process_key_event(%04x, %04x, %04x)" % (keyval, keycode, state)
+
+    if self.__debug:
+      print "process_key_event(%04x, %04x, %04x)" % (keyval, keycode, state)
+
     # ignore key release events
     is_press = ((state & ibus.ModifierType.RELEASE_MASK) == 0)
     if not is_press:
@@ -206,25 +202,25 @@ class EngineSteno(ibus.EngineBase):
     GLib.idle_add(self.__update)
 
 
-  def do_page_up(self):
+  def page_up(self):
     if self.__lookup_table.page_up():
       self.page_up_lookup_table()
       return True
     return False
 
-  def do_page_down(self):
+  def page_down(self):
     if self.__lookup_table.page_down():
       self.page_down_lookup_table()
       return True
     return False
 
-  def do_cursor_up(self):
+  def cursor_up(self):
     if self.__lookup_table.cursor_up():
       self.cursor_up_lookup_table()
       return True
     return False
 
-  def do_cursor_down(self):
+  def cursor_down(self):
     if self.__lookup_table.cursor_down():
       self.cursor_down_lookup_table()
       return True
@@ -262,15 +258,19 @@ class EngineSteno(ibus.EngineBase):
     self.update_lookup_table(self.__lookup_table, visible)
 
 
-  def do_focus_in(self):
-    print "focus_in"
+  def focus_in(self):
+    if self.__debug:
+      print "focus_in"
     self.register_properties(self.__prop_list)
 
-  def do_focus_out(self):
-    print "focus_out"
+  def focus_out(self):
+    if self.__debug:
+      print "focus_out"
 
-  def do_reset(self):
-    print "reset"
+  def reset(self):
+    if self.__debug:
+      print "reset"
 
-  def do_property_activate(self, prop_name):
-    print "PropertyActivate(%s)" % prop_name
+  def property_activate(self, prop_name):
+    if self.__debug:
+      print "PropertyActivate(%s)" % prop_name
