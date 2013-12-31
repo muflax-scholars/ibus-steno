@@ -18,6 +18,7 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 import os, os.path
+import re
 import traceback
 
 try:
@@ -80,14 +81,14 @@ class EngineSteno(ibus.EngineBase):
       "dictionary": "default.json",
       "keycode_to_steno": {
         # qwerty keys for reference
-        2: "S-",     # 1
-        3: "T-",     # 2
-        4: "P-",     # 3
-        5: "H-",     # 4
-        6: "*",      # 5
-        7: "#",      # 6
-        8: "-F",     # 7
-        9: "-P",     # 8
+        2:  "S-",    # 1
+        3:  "T-",    # 2
+        4:  "P-",    # 3
+        5:  "H-",    # 4
+        6:  "*",     # 5
+        7:  "#",     # 6
+        8:  "-F",    # 7
+        9:  "-P",    # 8
         10: "-L",    # 9
         11: "-T",    # 0
         12: "-D",    # -
@@ -125,7 +126,7 @@ class EngineSteno(ibus.EngineBase):
         49: "-E",    # n
         50: "-U",    # m
         51: "-E -U", # ,
-        # 52: "-E -U", # .
+        52: "-E -U", # .
       },
     }
 
