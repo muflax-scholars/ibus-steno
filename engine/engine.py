@@ -34,16 +34,6 @@ import gobject
 import ibus
 from ibus import keysyms, modifier
 
-# needed for autorepeat detection
-from ctypes import *
-class struct__XDisplay(Structure):
-    __slots__ = [
-    ]
-struct__XDisplay._fields_ = [
-    ('_opaque_struct', c_int)
-]
-Display = struct__XDisplay
-
 class EngineSteno(ibus.EngineBase):
   def __init__(self, bus, object_path, debug=False):
     self.__debug = debug
@@ -72,25 +62,6 @@ class EngineSteno(ibus.EngineBase):
       # set up stroke handling
       self.__down_keys = set()
       self.__up_keys   = set()
-
-      # don't use auto-repeat
-      try:
-        # get the X library because fucking Python grumble grumble
-        self.__xlib = cdll.LoadLibrary('libX11.so')
-
-        # load necessary functions
-        self.__XkbSetDetectableAutoRepeat          = self.__xlib.XkbSetDetectableAutoRepeat
-        self.__XkbSetDetectableAutoRepeat.restype  = c_int
-        self.__XkbSetDetectableAutoRepeat.argtypes = [POINTER(Display), c_int, POINTER(c_int)]
-
-        self.__XOpenDisplay                        = self.__xlib.XOpenDisplay
-        self.__XOpenDisplay.restype                = POINTER(Display)
-        self.__XOpenDisplay.argtypes               = [c_char_p]
-
-        print "Xlib loaded (sigh)..."
-      except OSError:
-        print "Xlib not found..."
-        self.__xlib = None
 
       print "ibus-steno ready to roll"
     except Exception as e:
@@ -360,42 +331,15 @@ class EngineSteno(ibus.EngineBase):
     visible = self.__lookup_table.get_number_of_candidates() > 0
     self.update_lookup_table(self.__lookup_table, visible)
 
-
   def focus_in(self):
     if self.__debug:
       print "focus_in"
 
     self.register_properties(self.__prop_list)
 
-    # don't use auto-repeat
-    self.set_auto_repeat(False)
-
   def focus_out(self):
     if self.__debug:
       print "focus_out"
-
-    # turn auto-repeat back on
-    self.set_auto_repeat(True)
-
-  def set_auto_repeat(self, mode):
-    # extern	Bool	XkbSetDetectableAutoRepeat(
-    # 	Display *		/* dpy */,
-    # 	Bool			/* detectable */,
-    # 	Bool *			/* supported */
-    # );
-
-    if self.__debug:
-      print "setting auto-repeat to:", mode
-
-    if self.__xlib:
-      display = self.__XOpenDisplay(None)
-      if bool(mode):
-        mode = c_int(1)
-      else:
-        mode = c_int(0)
-      supported_rtrn = c_int()
-
-      self.__XkbSetDetectableAutoRepeat(display, mode, byref(supported_rtrn))
 
   def reset(self):
     if self.__debug:
