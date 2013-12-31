@@ -239,16 +239,15 @@ class EngineSteno(ibus.EngineBase):
     if not keycode in self.__steno_keycodes():
       return False
 
+    # FIXME: Note that most environments don't set DetectAutoRepeat and so a release might just as well be an auto-repeat event. We can't patch them all, and disabling AutoRepeat in general is sucky, so instead we try to recognize repeated events, and then ignore them.
     if is_release:
-      # FIXME disable auto-repeat somehow >:<
-      self.__up_keys.add(keycode)
-      # remove invalid released keys
-      # self.__up_keys = self.__up_keys.intersection(self._down_keys)
+      if keycode in self.__down_keys:
+        self.__up_keys.add(keycode)
     else:
       self.__down_keys.add(keycode)
 
     # handle the stroke once all keys are released
-    if self.__down_keys == self.__up_keys:
+    if self.__down_keys and self.__down_keys == self.__up_keys:
       # map pressed keys into steno keys and split multi-key keys into individual keys.
       steno_keys = []
       for k in self.__down_keys:
